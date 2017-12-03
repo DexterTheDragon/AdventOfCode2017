@@ -6,30 +6,28 @@ import (
 	"os"
 )
 
-func InverseCaptcha(input string) int {
+func InverseCaptcha(input string, step int) int {
+	input_length := len(input)
 	result := 0
-	prev := 0
-	var first int
 	for pos, char := range input {
 		i := int(char - '0')
-		// Save the first number so we can refer back to it
-		if pos == 0 {
-			first = i
+
+		check_pos := pos + step
+		// If our check_pos is out of bounds of the array wrap it
+		// around to the start of the array
+		for check_pos >= input_length {
+			check_pos -= input_length
 		}
-		// Add the number if it matches the previous
-		if prev == i {
+		check := int(input[check_pos] - '0')
+		if i == check {
 			result += i
 		}
-		// When we reach the end, check against the first number
-		if pos == len(input)-1 && first == i {
-			result += i
-		}
-		prev = i
 	}
 	return result
 }
 
 func main() {
+	isHalfway := flag.Bool("halfway", false, "Use halfway step for Part Two")
 	flag.Parse()
 
 	args := flag.Args()
@@ -37,5 +35,12 @@ func main() {
 		fmt.Println("Input is missing.")
 		os.Exit(1)
 	}
-	fmt.Printf("Result: %d\n", InverseCaptcha(args[0]))
+
+	input := args[0]
+	step := 1
+	if *isHalfway {
+		step = len(input) / 2
+	}
+
+	fmt.Printf("Result: %d\n", InverseCaptcha(input, step))
 }
